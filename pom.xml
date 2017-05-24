@@ -89,6 +89,23 @@
 
     <plugins>
       <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>create-executable-war</id>
+            <phase>package</phase>
+            <goals>
+              <goal>repackage</goal>
+            </goals>
+            <configuration>
+              <classifier>executable</classifier>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      
+      <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.5.1</version>
         <configuration>
