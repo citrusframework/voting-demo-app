@@ -2,10 +2,10 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   
-  <groupId>com.consol.citrus.demo</groupId>
-  <artifactId>voting-demo</artifactId>
-  <name>voting-demo</name>
-  <version>1.0.0-SNAPSHOT</version>
+  <groupId>com.consol.citrus.samples</groupId>
+  <artifactId>voting-demo-app</artifactId>
+  <name>voting-demo-app</name>
+  <version>1.0.0</version>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -17,11 +17,61 @@
     <junit.version>4.12</junit.version>
     <cucumber.version>1.2.5</cucumber.version>
     <citrus.version>2.7</citrus.version>
+    <skip.gpg>false</skip.gpg>
   </properties>
 
+  <licenses>
+    <license>
+      <name>The Apache License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>manual</distribution>
+    </license>
+  </licenses>
+
+  <scm>
+    <connection>scm:git:https://github.com/citrusframework/voting-demo-app.git</connection>
+    <developerConnection>scm:git:git@github.com:citrusframework/voting-demo-app.git</developerConnection>
+    <url>https://github.com/citrusframework/voting-demo-app</url>
+  </scm>
+  
   <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <targetPath>${project.build.directory}/classes</targetPath>
+      </resource>
+      <resource>
+        <directory>src/main/fabric8</directory>
+        <targetPath>META-INF/fabric8</targetPath>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
+
     <pluginManagement>
       <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-gpg-plugin</artifactId>
+          <version>1.6</version>
+          <executions>
+            <execution>
+              <id>sign-artifacts</id>
+              <phase>verify</phase>
+              <goals>
+                <goal>sign</goal>
+              </goals>
+            </execution>
+          </executions>
+          <configuration>
+            <useAgent>true</useAgent>
+            <keyname>christoph.deppisch@consol.de</keyname>
+            <skip>${skip.gpg}</skip>
+            <gpgArguments>
+              <arg>--allow-weak-digest-algos</arg>
+            </gpgArguments>
+          </configuration>
+        </plugin>
+        
         <plugin>
           <groupId>org.springframework.boot</groupId>
           <artifactId>spring-boot-maven-plugin</artifactId>
@@ -46,25 +96,36 @@
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>3.0.1</version>
+        <executions>
+          <execution>
+            <id>copy-tutorials</id>
+            <goals>
+              <goal>resources</goal>
+            </goals>
+            <phase>process-resources</phase>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>3.0.1</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.10.4</version>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-war-plugin</artifactId>
         <version>3.0.0</version>
         <configuration>
           <failOnMissingWebXml>false</failOnMissingWebXml>
-        </configuration>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.activemq.tooling</groupId>
-        <artifactId>activemq-maven-plugin</artifactId>
-        <version>${activemq.version}</version>
-        <configuration>
-          <fork>false</fork>
-          <systemProperties>
-            <property>
-              <name>log4j.configuration</name>
-              <value>log4j.properties</value>
-            </property>
-          </systemProperties>
         </configuration>
       </plugin>
 
@@ -105,6 +166,73 @@
             </goals>
           </execution>
         </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>io.fabric8</groupId>
+        <artifactId>docker-maven-plugin</artifactId>
+        <version>0.20.1</version>
+        <configuration>
+          <verbose>true</verbose>
+          <images>
+            <image>
+              <alias>voting-demo-app</alias>
+              <name>citrus/voting-demo-app:${project.version}</name>
+              <build>
+                <dockerFileDir>${project.basedir}/src/main/docker</dockerFileDir>
+              </build>
+              <run>
+                <namingStrategy>alias</namingStrategy>
+                <env>
+                  <CATALINA_OPTS>-Xmx64m</CATALINA_OPTS>
+                  <SPRING_PROFILES_ACTIVE>in_memory</SPRING_PROFILES_ACTIVE>
+                </env>
+                <ports>
+                  <port>8080:8080</port>
+                </ports>
+                <wait>
+                  <http>
+                    <url>http://localhost:8080/voting</url>
+                    <method>GET</method>
+                    <status>200</status>
+                  </http>
+                  <time>60000</time>
+                  <shutdown>500</shutdown>
+                </wait>
+                <log>
+                  <enabled>true</enabled>
+                  <color>green</color>
+                </log>
+              </run>
+            </image>
+          </images>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>io.fabric8</groupId>
+        <artifactId>fabric8-maven-plugin</artifactId>
+        <version>3.3.5</version>
+        <configuration>
+          <mode>openshift</mode>
+          <verbose>true</verbose>
+          <images>
+            <image>
+              <alias>voting-demo-app</alias>
+              <name>voting-demo-app:${project.version}</name>
+            </image>
+          </images>
+          <resources>
+            <labels>
+              <all>
+                <property>
+                  <name>app</name>
+                  <value>voting-demo-app</value>
+                </property>
+              </all>
+            </labels>
+          </resources>
+        </configuration>
       </plugin>
     </plugins>
   </build>
@@ -263,6 +391,30 @@
   </dependencies>
 
   <profiles>
+    <!-- Distribution Management -->
+    <profile>
+      <id>release-inhouse</id>
+      <distributionManagement>
+        <repository>
+          <id>consol-nexus</id>
+          <url>http://build-n.int.consol.de/repository/citrus-releases</url>
+        </repository>
+        <snapshotRepository>
+          <id>consol-nexus</id>
+          <url>http://build-n.int.consol.de/repository/citrus-snapshots</url>
+        </snapshotRepository>
+      </distributionManagement>
+
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    
     <profile>
       <id>embedded</id>
       <activation>
@@ -272,30 +424,6 @@
       </activation>
       <build>
         <plugins>
-          <plugin>
-            <groupId>org.apache.activemq.tooling</groupId>
-            <artifactId>activemq-maven-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>start-activemq</id>
-                <phase>pre-integration-test</phase>
-                <goals>
-                  <goal>run</goal>
-                </goals>
-                <configuration>
-                  <fork>true</fork>
-                </configuration>
-              </execution>
-              <execution>
-                <id>stop-activemq</id>
-                <phase>post-integration-test</phase>
-                <goals>
-                  <goal>stop</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-
           <plugin>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-maven-plugin</artifactId>

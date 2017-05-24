@@ -38,7 +38,7 @@ public class VotingServiceImpl implements VotingService {
     private Map<String, Voting> votings = new HashMap<>();
 
     @Autowired
-    private ReportingService reportingService;
+    private List<ReportingService> reportingServices;
 
     @Override
     public List<Voting> getVotings() {
@@ -99,7 +99,13 @@ public class VotingServiceImpl implements VotingService {
         log.info("Close voting: " + voting.getId());
 
         if (voting.isReport()) {
-            reportingService.report(voting, getTopVote(voting));
+            reportingServices.forEach(service -> {
+                try {
+                    service.report(voting, getTopVote(voting));
+                } catch (Exception e) {
+                    log.error("Failed to send report", e);
+                }
+            });
         }
     }
 

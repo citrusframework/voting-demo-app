@@ -14,49 +14,36 @@
  * limitations under the License.
  */
 
-package com.consol.citrus.demo.voting.service;
+package com.consol.citrus.demo.voting.jms;
 
 import com.consol.citrus.demo.voting.model.VoteOption;
 import com.consol.citrus.demo.voting.model.Voting;
+import com.consol.citrus.demo.voting.service.ReportingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.context.annotation.Profile;
+import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.util.FileCopyUtils;
-
-import java.io.IOException;
-import java.io.InputStreamReader;
 
 /**
  * @author Christoph Deppisch
  */
 @Service
-public class ReportingServiceImpl implements ReportingService {
+@Profile("jms")
+public class JmsReportingService implements ReportingService {
 
     /** Logger */
-    private static Logger log = LoggerFactory.getLogger(ReportingServiceImpl.class);
+    private static Logger log = LoggerFactory.getLogger(JmsReportingService.class);
 
     @Autowired
-    private MailServiceImpl mailService;
+    private JmsTemplate jmsTemplate;
+
+    private String reportingDestination = "jms.voting.report";
 
     @Override
     public void report(Voting voting, VoteOption topVote) {
         log.info("Create reporting for voting: " + voting.getId());
-        sendMailReport(voting, topVote);
-    }
-
-    /**
-     * Sends mail report to participant mailing list.
-     * @param voting
-     */
-    private void sendMailReport(Voting voting, VoteOption topVote) {
-        try {
-            mailService.sendMail("participants@example.org", "Voting results",
-                    String.format(FileCopyUtils.copyToString(new InputStreamReader(
-                            new ClassPathResource("templates/reporting-mail.txt").getInputStream())), voting.getTitle(), topVote.getName()));
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to read reporting mail text", e);
-        }
+        jmsTemplate.convertAndSend(reportingDestination, voting);
     }
 }
