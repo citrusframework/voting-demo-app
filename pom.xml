@@ -18,6 +18,9 @@
     <junit.version>4.12</junit.version>
     <cucumber.version>1.2.5</cucumber.version>
     <citrus.version>2.7</citrus.version>
+    <openshift.domain>paas.osp.consol.de</openshift.domain>
+    <openshift.namespace>citrus</openshift.namespace>
+    <application.name>voting-demo-app</application.name>
     <skip.gpg>false</skip.gpg>
   </properties>
 
@@ -30,8 +33,8 @@
   </licenses>
 
   <scm>
-    <connection>scm:git:https://github.com/citrusframework/voting-demo-app.git</connection>
-    <developerConnection>scm:git:git@github.com:citrusframework/voting-demo-app.git</developerConnection>
+    <connection>https://github.com/citrusframework/voting-demo-app.git</connection>
+    <developerConnection>git@github.com:citrusframework/voting-demo-app.git</developerConnection>
     <url>https://github.com/citrusframework/voting-demo-app</url>
   </scm>
   

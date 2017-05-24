@@ -5,26 +5,26 @@ items:
 - apiVersion: v1
   kind: ImageStream
   metadata:
-    name: ${project.artifactId}
-    namespace: citrus
+    name: ${application.name}
+    namespace: ${openshift.namespace}
     labels:
-      app: ${project.artifactId}
+      app: ${application.name}
       provider: fabric8
-      project: ${project.artifactId}
+      project: ${application.name}
       version: ${project.version}
-      group: com.consol
+      group: ${project.groupId}
   spec: {}
 - apiVersion: v1
   kind: BuildConfig
   metadata:
-    name: ${project.artifactId}
-    namespace: citrus
+    name: ${application.name}
+    namespace: ${openshift.namespace}
     labels:
-      app: ${project.artifactId}
+      app: ${application.name}
       provider: fabric8
-      project: ${project.artifactId}
+      project: ${application.name}
       version: ${project.version}
-      group: com.consol
+      group: ${project.groupId}
   spec:
     runPolicy: Serial
     source:
@@ -39,21 +39,21 @@ items:
     output:
       to:
         kind: ImageStreamTag
-        name: '${project.artifactId}:latest'
+        name: '${application.name}:latest'
     resources: {}
     postCommit: {}
     nodeSelector: null
 - apiVersion: v1
   kind: DeploymentConfig
   metadata:
+    name: ${application.name}
+    namespace: ${openshift.namespace}
     labels:
-      app: ${project.artifactId}
+      app: ${application.name}
       provider: fabric8
-      project: ${project.artifactId}
+      project: ${application.name}
       version: ${project.version}
-      group: com.consol
-    name: ${project.artifactId}
-    namespace: citrus
+      group: ${project.groupId}
   spec:
     replicas: 1
     strategy:
@@ -66,21 +66,21 @@ items:
         maxSurge: 25%
       resources: {}
     selector:
-      project: ${project.artifactId}
+      project: ${application.name}
       provider: fabric8
       version: ${project.version}
-      group: com.consol
+      group: ${project.groupId}
     template:
       metadata:
         labels:
-          app: ${project.artifactId}
+          app: ${application.name}
           provider: fabric8
-          project: ${project.artifactId}
+          project: ${application.name}
           version: ${project.version}
-          group: com.consol
+          group: ${project.groupId}
       spec:
         containers:
-        - name: ${project.artifactId}
+        - name: ${application.name}
           imagePullPolicy: IfNotPresent
           env:
           - name: SPRING_PROFILES_ACTIVE
@@ -120,27 +120,27 @@ items:
       imageChangeParams:
         automatic: true
         containerNames:
-        - ${project.artifactId}
+        - ${application.name}
         from:
           kind: ImageStreamTag
-          namespace: citrus
-          name: ${project.artifactId}:latest
+          namespace: ${openshift.namespace}
+          name: ${application.name}:latest
     - type: ConfigChange
 - apiVersion: v1
   kind: Service
   metadata:
-    name: ${project.artifactId}-service
-    namespace: citrus
+    name: ${application.name}-service
+    namespace: ${openshift.namespace}
     annotations:
       prometheus.io/port: "9779"
       prometheus.io/scrape: "true"
     labels:
       expose: "true"
-      app: ${project.artifactId}
+      app: ${application.name}
       provider: fabric8
-      project: ${project.artifactId}
+      project: ${application.name}
       version: ${project.version}
-      group: com.consol
+      group: ${project.groupId}
   spec:
     ports:
     - name: 8080-tcp
@@ -156,27 +156,27 @@ items:
       port: 8778
       targetPort: 8778
     selector:
-      project: ${project.artifactId}
+      project: ${application.name}
       provider: fabric8
-      group: com.consol
+      group: ${project.groupId}
     type: ClusterIP
     sessionAffinity: None
 - apiVersion: v1
   kind: Route
   metadata:
-    name: ${project.artifactId}-service
-    namespace: citrus
+    name: ${application.name}-service
+    namespace: ${openshift.namespace}
     labels:
       expose: "true"
       provider: fabric8
-      project: ${project.artifactId}
+      project: ${application.name}
       version: ${project.version}
-      group: com.consol
+      group: ${project.groupId}
   spec:
-    host: ${project.artifactId}-web.paas.osp.consol.de
+    host: ${application.name}.${openshift.domain}
     to:
       kind: Service
-      name: ${project.artifactId}-service
+      name: ${application.name}-service
       weight: 100
     port:
       targetPort: 8080-tcp
