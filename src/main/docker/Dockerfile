@@ -1,25 +1,22 @@
-FROM fabric8/tomcat-8
+FROM maven:3.5.0-jdk-8
 
-MAINTAINER ConSol Software GmbH <testautomatisierung@consol.de>
+MAINTAINER citrusframework.org <citrus-dev-l@consol.de>
 
 ENV APP_VERSION=1.0.0
-ENV CATALINA_OUT=/dev/null
+ENV APP_ARTIFACT=voting-demo-app
+ENV DEPLOY_DIR /app
+
+EXPOSE 8080
 
 USER root
 
-RUN mkdir ${DEPLOY_DIR} && rm -rf /opt/tomcat/webapps/ROOT
+RUN mkdir ${DEPLOY_DIR}
 
-RUN curl http://build-n.int.consol.de/repository/citrus-releases/com/consol/citrus/samples/voting-demo-app/${APP_VERSION}/voting-demo-app-${APP_VERSION}.war -o ${DEPLOY_DIR}/ROOT.war
-
-RUN ln -s ${DEPLOY_DIR}/ROOT.war /opt/tomcat/webapps/ROOT.war
-
-# Use faster (though more unsecure) random number generator
-RUN export CATALINA_OPTS="${CATALINA_OPTS} $(/opt/run-java-options) $(/opt/java-container-options) $(/opt/debug-options) -Djava.security.egd=file:/dev/./urandom"
+RUN curl http://build-n.int.consol.de/repository/citrus-releases/com/consol/citrus/samples/${APP_ARTIFACT}/${APP_VERSION}/${APP_ARTIFACT}-${APP_VERSION}-executable.war -o ${DEPLOY_DIR}/${APP_ARTIFACT}.war
 
 RUN groupadd -g ${OPENSHIFT_UID} openshift
-RUN useradd -u ${OPENSHIFT_UID} -g openshift -G jboss openshift
-RUN chown -h openshift:jboss /opt/tomcat && chown -R openshift:jboss /opt/apache-tomcat-${TOMCAT_VERSION}
+RUN useradd -g openshift -u ${OPENSHIFT_UID} openshift
 
-CMD /opt/tomcat/bin/catalina.sh run
+CMD java -jar ${DEPLOY_DIR}/${APP_ARTIFACT}.war
 
 USER openshift
