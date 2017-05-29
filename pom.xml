@@ -20,6 +20,7 @@
     <citrus.version>2.7</citrus.version>
     <openshift.domain>paas.osp.consol.de</openshift.domain>
     <openshift.namespace>citrus</openshift.namespace>
+    <openshift.user>1000080000</openshift.user>
     <application.name>voting-demo-app</application.name>
     <skip.gpg>false</skip.gpg>
   </properties>
