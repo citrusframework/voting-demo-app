@@ -36,9 +36,6 @@ items:
       type: Docker
       dockerStrategy:
         dockerfilePath: src/main/docker/Dockerfile
-        env:
-        - name: OPENSHIFT_UID
-          value: '${openshift.user}'
     output:
       to:
         kind: ImageStreamTag
