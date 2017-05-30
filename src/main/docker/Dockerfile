@@ -19,9 +19,10 @@ RUN mkdir ${DEPLOY_DIR}
 RUN curl http://build-n.int.consol.de/repository/citrus-releases/com/consol/citrus/samples/${APP_ARTIFACT}/${APP_VERSION}/${APP_ARTIFACT}-${APP_VERSION}-executable.war -o ${DEPLOY_DIR}/${APP_ARTIFACT}.war
 
 ### configure startup
-RUN $INST_SCRIPTS/libnss_wrapper.sh
 RUN $INST_SCRIPTS/set_user_permission.sh $DEPLOY_DIR
+
+RUN useradd -U openshift
 
 CMD java -jar ${DEPLOY_DIR}/${APP_ARTIFACT}.war
 
-USER 1980
+USER openshift
