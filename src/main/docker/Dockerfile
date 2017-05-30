@@ -12,12 +12,12 @@ USER root
 
 RUN mkdir ${DEPLOY_DIR}
 
-RUN curl http://build-n.int.consol.de/repository/citrus-releases/com/consol/citrus/samples/${APP_ARTIFACT}/${APP_VERSION}/${APP_ARTIFACT}-${APP_VERSION}-executable.war -o ${DEPLOY_DIR}/${APP_ARTIFACT}.war
+RUN curl https://labs.consol.de/maven/repository/com/consol/citrus/samples/${APP_ARTIFACT}/${APP_VERSION}/${APP_ARTIFACT}-${APP_VERSION}-executable.war -o ${DEPLOY_DIR}/${APP_ARTIFACT}.war
 
 RUN find $DEPLOY_DIR -name '*.war' -exec chmod a+x {} +
 
-RUN useradd -U openshift
+RUN useradd -U citrus
 
 CMD java -jar ${DEPLOY_DIR}/${APP_ARTIFACT}.war
 
-USER openshift
+USER citrus
