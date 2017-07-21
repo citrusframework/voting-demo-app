@@ -3,47 +3,6 @@ apiVersion: v1
 kind: List
 items:
 - apiVersion: v1
-  kind: ImageStream
-  metadata:
-    name: ${application.name}
-    namespace: ${openshift.namespace}
-    labels:
-      app: ${application.name}
-      provider: fabric8
-      project: ${application.name}
-      version: ${project.version}
-      group: ${project.groupId}
-  spec: {}
-- apiVersion: v1
-  kind: BuildConfig
-  metadata:
-    name: ${application.name}
-    namespace: ${openshift.namespace}
-    labels:
-      app: ${application.name}
-      provider: fabric8
-      project: ${application.name}
-      version: ${project.version}
-      group: ${project.groupId}
-  spec:
-    runPolicy: Serial
-    source:
-      type: Git
-      git:
-        uri: '${project.scm.url}'
-        ref: master
-    strategy:
-      type: Docker
-      dockerStrategy:
-        dockerfilePath: src/main/docker/Dockerfile
-    output:
-      to:
-        kind: ImageStreamTag
-        name: '${application.name}:latest'
-    resources: {}
-    postCommit: {}
-    nodeSelector: null
-- apiVersion: v1
   kind: DeploymentConfig
   metadata:
     name: ${application.name}
@@ -81,23 +40,14 @@ items:
       spec:
         containers:
         - name: ${application.name}
+          image: citrusframework/voting-demo-app:latest
           imagePullPolicy: IfNotPresent
           env:
           - name: SPRING_PROFILES_ACTIVE
             value: in_memory
-          - name: KUBERNETES_NAMESPACE
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.namespace
           ports:
           - containerPort: 8080
             name: http
-            protocol: TCP
-          - containerPort: 9779
-            name: prometheus
-            protocol: TCP
-          - containerPort: 8778
-            name: jolokia
             protocol: TCP
           securityContext:
             privileged: false
@@ -116,24 +66,12 @@ items:
         - name: tomcat-temp
           emptyDir: {}
     triggers:
-    - type: ImageChange
-      imageChangeParams:
-        automatic: true
-        containerNames:
-        - ${application.name}
-        from:
-          kind: ImageStreamTag
-          namespace: ${openshift.namespace}
-          name: ${application.name}:latest
     - type: ConfigChange
 - apiVersion: v1
   kind: Service
   metadata:
     name: ${application.name}-service
     namespace: ${openshift.namespace}
-    annotations:
-      prometheus.io/port: "9779"
-      prometheus.io/scrape: "true"
     labels:
       expose: "true"
       app: ${application.name}
@@ -147,14 +85,6 @@ items:
       protocol: TCP
       port: 8080
       targetPort: 8080
-    - name: 8443-tcp
-      protocol: TCP
-      port: 8443
-      targetPort: 8443
-    - name: 8778-tcp
-      protocol: TCP
-      port: 8778
-      targetPort: 8778
     selector:
       project: ${application.name}
       provider: fabric8
