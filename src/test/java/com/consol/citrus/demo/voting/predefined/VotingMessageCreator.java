@@ -23,12 +23,27 @@ import com.consol.citrus.mail.model.*;
 import com.consol.citrus.message.DefaultMessage;
 import com.consol.citrus.message.Message;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.xml.transform.StringResult;
 
 /**
  * @author Christoph Deppisch
  */
 public class VotingMessageCreator {
+
+    @MessageCreator("userLogin")
+    public Message userLogin() {
+        return new HttpMessage("{\"username\":\"test\",\"password\":\"secr3t\"}")
+                .method(HttpMethod.POST)
+                .path("/login")
+                .contentType("application/json");
+    }
+
+    @MessageCreator("userToken")
+    public Message userToken() {
+        return new HttpMessage("@variable('token')@")
+                .status(HttpStatus.OK);
+    }
 
     @MessageCreator("createVoting")
     public Message createVoting() {
@@ -42,6 +57,7 @@ public class VotingMessageCreator {
                 "]}")
                 .path("/voting")
                 .method(HttpMethod.POST)
+                .header("X-Auth-Token", "${token}")
                 .contentType("application/json");
     }
 
@@ -50,6 +66,7 @@ public class VotingMessageCreator {
         return new HttpMessage()
                 .path("/voting/${id}/close")
                 .method(HttpMethod.PUT)
+                .header("X-Auth-Token", "${token}")
                 .contentType("application/json");
     }
 

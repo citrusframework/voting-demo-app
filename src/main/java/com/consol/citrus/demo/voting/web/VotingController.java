@@ -30,8 +30,12 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/voting")
 public class VotingController {
 
+    private final VotingService votingService;
+
     @Autowired
-    private VotingService votingService;
+    public VotingController(VotingService votingService) {
+        this.votingService = votingService;
+    }
 
     @RequestMapping(method = RequestMethod.GET)
     public String list(Model model) {
@@ -52,7 +56,7 @@ public class VotingController {
         }
 
         votingService.add(new Voting(title, options));
-        return "redirect:voting";
+        return "redirect:/voting?token={token}";
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
@@ -76,6 +80,6 @@ public class VotingController {
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
     public String remove(@PathVariable("id") String votingId) {
         votingService.remove(votingId);
-        return "redirect:voting";
+        return "redirect:/voting?token={token}";
     }
 }
