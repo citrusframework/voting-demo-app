@@ -18,7 +18,7 @@
     <junit.version>4.12</junit.version>
     <cucumber.version>1.2.5</cucumber.version>
     <citrus.version>2.7</citrus.version>
-    <openshift.domain>paas.osp.consol.de</openshift.domain>
+    <openshift.domain>paasint.consol.de</openshift.domain>
     <openshift.namespace>citrus</openshift.namespace>
     <openshift.user>1000080000</openshift.user>
     <application.name>voting-demo-app</application.name>
