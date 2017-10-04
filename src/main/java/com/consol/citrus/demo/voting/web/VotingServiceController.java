@@ -16,8 +16,8 @@
 
 package com.consol.citrus.demo.voting.web;
 
-import com.consol.citrus.demo.voting.model.VoteOption;
-import com.consol.citrus.demo.voting.model.Voting;
+import com.consol.citrus.demo.voting.model.*;
+import com.consol.citrus.demo.voting.service.UserService;
 import com.consol.citrus.demo.voting.service.VotingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -30,50 +30,68 @@ import java.util.List;
  * @author Christoph Deppisch
  */
 @Controller
-@RequestMapping("/rest/services/voting")
+@RequestMapping("/rest/services")
 public class VotingServiceController {
 
-    @Autowired
-    private VotingService votingService;
+    private final UserService userService;
+    private final VotingService votingService;
 
-    @RequestMapping(method = RequestMethod.GET)
+    @Autowired
+    public VotingServiceController(UserService userService, VotingService votingService) {
+        this.userService = userService;
+        this.votingService = votingService;
+    }
+
+    @RequestMapping(value = "/login", method = RequestMethod.POST)
+    @ResponseBody
+    public String login(@RequestBody User user) {
+        return userService.login(user);
+    }
+
+    @RequestMapping(value = "/logout/{token}", method = RequestMethod.GET)
+    public ResponseEntity logout(@PathVariable("token") String token) {
+        userService.logout(token);
+        return ResponseEntity.ok().build();
+    }
+
+    @RequestMapping(value = "/voting", method = RequestMethod.GET)
     @ResponseBody
     public List<Voting> list() {
         return votingService.getVotings();
     }
 
-    @RequestMapping(method = RequestMethod.POST)
+    @RequestMapping(value = "/voting", method = RequestMethod.POST)
     @ResponseBody
     public Voting add(@RequestBody Voting voting) {
         votingService.add(voting);
         return voting;
     }
 
-    @RequestMapping(value = "/{id}", method = RequestMethod.GET)
+    @RequestMapping(value = "/voting/{id}", method = RequestMethod.GET)
     @ResponseBody
     public Voting getVoting(@PathVariable("id") String votingId) {
         return votingService.get(votingId);
     }
 
-    @RequestMapping(value = "/{id}/{option}", method = RequestMethod.PUT)
+    @RequestMapping(value = "/voting/{id}/{option}", method = RequestMethod.PUT)
     public ResponseEntity vote(@PathVariable("id") String votingId, @PathVariable("option") String option) {
         votingService.vote(votingId, option);
         return ResponseEntity.ok().build();
     }
 
-    @RequestMapping(value = "/{id}/top", method = RequestMethod.GET)
+    @RequestMapping(value = "/voting/{id}/top", method = RequestMethod.GET)
     @ResponseBody
     public VoteOption vote(@PathVariable("id") String votingId) {
         return votingService.getTopVote(votingService.get(votingId));
     }
 
-    @RequestMapping(value = "/{id}/close", method = RequestMethod.PUT)
+    @RequestMapping(value = "/voting/{id}/close", method = RequestMethod.PUT)
     public ResponseEntity close(@PathVariable("id") String votingId) {
         votingService.close(votingService.get(votingId));
         return ResponseEntity.ok().build();
     }
 
-    @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/voting/{id}", method = RequestMethod.DELETE)
     public ResponseEntity remove(@PathVariable("id") String votingId) {
         votingService.remove(votingId);
         return ResponseEntity.ok().build();

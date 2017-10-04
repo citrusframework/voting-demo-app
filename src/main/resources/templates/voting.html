@@ -14,12 +14,14 @@
 
       <h1>Voting list</h1>
 
+      {{#user}}<p class="lead">Hello <span class="label-info">{{user.name}}</span>!</p>{{/user}}
+
       <div class="list-group">
         {{^votings}}
-        <a href="/voting" class="list-group-item">No voting found</a>
+        <a href="/voting?token={{token}}" class="list-group-item">No voting found</a>
         {{/votings}}
         {{#votings}}
-        <a href="/voting/{{id}}" class="list-group-item">{{title}} {{#closed}}<span class="badge">closed</span>{{/closed}}</a>
+        <a href="/voting/{{id}}?token={{token}}" class="list-group-item">{{title}} {{#closed}}<span class="badge">closed</span>{{/closed}}</a>
         {{/votings}}
       </div>
 

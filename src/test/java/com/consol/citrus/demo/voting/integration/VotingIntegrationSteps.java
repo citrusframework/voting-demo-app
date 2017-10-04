@@ -50,6 +50,27 @@ public class VotingIntegrationSteps {
     @CitrusResource
     private TestDesigner designer;
 
+    @Given("^User is logged in$")
+    public void userIsLoggedIn() throws Throwable {
+        designer.http()
+                .client("http://localhost:8080")
+                .send()
+                .post("/login")
+                .queryParam("username", "test")
+                .queryParam("password", "secr3t")
+                .contentType("application/x-www-form-urlencoded");
+
+        designer.http()
+                .client("http://localhost:8080")
+                .receive()
+                .response(HttpStatus.FOUND)
+                .validationCallback((message, testContext) -> {
+                    String location = message.getHeader("Location").toString();
+                    String token = location.substring(location.indexOf("token=") + 6);
+                    testContext.setVariable("token", token);
+                });
+    }
+
     @Given("^New voting \"([^\"]*)\"$")
     public void newVoting(String title) {
         designer.variable("id", "citrus:randomUUID()");
@@ -75,6 +96,7 @@ public class VotingIntegrationSteps {
             .client(votingClient)
             .send()
             .post("/voting")
+            .header("X-Auth-Token", "${token}")
             .contentType("application/json")
             .payload("{ \"id\": \"${id}\", \"title\": \"${title}\", \"options\": ${options}, \"report\": ${report} }");
 
@@ -88,7 +110,8 @@ public class VotingIntegrationSteps {
     public void voteFor(String option) {
         designer.http().client(votingClient)
                 .send()
-                .put("voting/${id}/" + option);
+                .put("voting/${id}/" + option)
+                .header("X-Auth-Token", "${token}");
 
         designer.http().client(votingClient)
                 .receive()
@@ -109,7 +132,8 @@ public class VotingIntegrationSteps {
         designer.http()
             .client(votingClient)
             .send()
-            .put("/voting/${id}/close");
+            .put("/voting/${id}/close")
+            .header("X-Auth-Token", "${token}");
 
         designer.http()
             .client(votingClient)
@@ -130,6 +154,7 @@ public class VotingIntegrationSteps {
                 .client(votingClient)
                 .send()
                 .get("/voting/${id}")
+                .header("X-Auth-Token", "${token}")
                 .accept("application/json");
 
         designer.http()
@@ -166,6 +191,7 @@ public class VotingIntegrationSteps {
             .client(votingClient)
             .send()
             .get("/voting")
+            .header("X-Auth-Token", "${token}")
             .accept("application/json");
 
         designer.http()
@@ -188,6 +214,7 @@ public class VotingIntegrationSteps {
                 .client(votingClient)
                 .send()
                 .get("/voting/${id}/top")
+                .header("X-Auth-Token", "${token}")
                 .accept("application/json");
 
         designer.http()

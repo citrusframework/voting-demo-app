@@ -6,6 +6,8 @@ Feature: Voting Http REST API
       | id     | citrus:randomUUID()  |
       | title  | Do you like Mondays? |
       | report | true                 |
+    When <votingClient> sends message <userLogin>
+    Then <votingClient> should receive PLAINTEXT message <userToken>
 
   Scenario: Close voting with report
     When <votingClient> sends message <createVoting>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2016 the original author or authors.
+ * Copyright 2006-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package com.consol.citrus.demo.voting.predefined;
+package com.consol.citrus.demo.voting.service;
 
-import cucumber.api.CucumberOptions;
-import cucumber.api.junit.Cucumber;
-import org.junit.runner.RunWith;
+import com.consol.citrus.demo.voting.model.User;
 
 /**
  * @author Christoph Deppisch
  */
-@RunWith(Cucumber.class)
-@CucumberOptions(
-        glue = { "com.consol.citrus.cucumber.step.runner" },
-        plugin = { "com.consol.citrus.cucumber.CitrusReporter" } )
-public class VotingPredefinedFeatureIT {
+public interface UserService {
+
+    String login(User user);
+
+    void logout(String token);
+
+    boolean verify(String token);
 }

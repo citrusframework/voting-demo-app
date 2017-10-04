@@ -15,7 +15,7 @@
       <h2>{{voting.title}}</h2>
 
       {{#voting.options}}
-      <a href="/voting/{{voting.id}}/vote?option={{name}}" {{#voting.closed}}disabled="disabled"{{/voting.closed}} class="btn btn-default" style="min-width: 10em;">{{name}}</a>
+      <a href="/voting/{{voting.id}}/vote?option={{name}}&token={{token}}" {{#voting.closed}}disabled="disabled"{{/voting.closed}} class="btn btn-default" style="min-width: 10em;">{{name}}</a>
       {{/voting.options}}
 
       <h3>Results</h3>
@@ -28,7 +28,7 @@
       {{/voting.options}}
 
       <p>
-        {{^voting.closed}}<a class="btn btn-lg btn-primary" href="/voting/{{id}}/close">Close voting</a>{{/voting.closed}} <a class="btn btn-lg btn-default" href="/voting" role="button">Back</a>
+        {{^voting.closed}}<a class="btn btn-lg btn-primary" href="/voting/{{id}}/close?token={{token}}">Close voting</a>{{/voting.closed}} <a class="btn btn-lg btn-default" href="/voting?token={{token}}" role="button">Back</a>
       </p>
     </div>
   </div>

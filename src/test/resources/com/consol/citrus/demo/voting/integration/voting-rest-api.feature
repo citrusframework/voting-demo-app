@@ -1,7 +1,8 @@
 Feature: Voting Http REST API
 
   Background:
-    Given New voting "Do you like cucumbers?"
+    Given User is logged in
+    And New voting "Do you like cucumbers?"
     And voting options are "yes:no"
 
   Scenario: Create voting
