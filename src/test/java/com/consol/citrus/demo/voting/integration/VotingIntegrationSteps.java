@@ -18,14 +18,16 @@ package com.consol.citrus.demo.voting.integration;
 
 import com.consol.citrus.annotations.CitrusEndpoint;
 import com.consol.citrus.annotations.CitrusResource;
-import com.consol.citrus.dsl.design.TestDesigner;
+import com.consol.citrus.dsl.runner.TestRunner;
 import com.consol.citrus.http.client.HttpClient;
+import com.consol.citrus.http.message.HttpMessageHeaders;
 import com.consol.citrus.jms.endpoint.JmsEndpoint;
 import com.consol.citrus.mail.message.CitrusMailMessageHeaders;
 import com.consol.citrus.mail.server.MailServer;
 import com.consol.citrus.message.MessageType;
 import cucumber.api.DataTable;
 import cucumber.api.java.en.*;
+import org.junit.Assert;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 
@@ -48,74 +50,76 @@ public class VotingIntegrationSteps {
     private JmsEndpoint reportingEndpoint;
 
     @CitrusResource
-    private TestDesigner designer;
+    private TestRunner runner;
 
     @Given("^User is logged in$")
     public void userIsLoggedIn() throws Throwable {
-        designer.http()
+        runner.http(action -> action
                 .client("http://localhost:8080")
                 .send()
                 .post("/login")
                 .queryParam("username", "test")
                 .queryParam("password", "secr3t")
-                .contentType("application/x-www-form-urlencoded");
+                .contentType("application/x-www-form-urlencoded"));
 
-        designer.http()
+        runner.http(action -> action
                 .client("http://localhost:8080")
                 .receive()
                 .response(HttpStatus.FOUND)
-                .validationCallback((message, testContext) -> {
+                .validationCallback((message, context) -> {
+                    Assert.assertEquals(HttpStatus.FOUND.value(), message.getHeader(HttpMessageHeaders.HTTP_STATUS_CODE));
+
                     String location = message.getHeader("Location").toString();
                     String token = location.substring(location.indexOf("token=") + 6);
-                    testContext.setVariable("token", token);
-                });
+                    context.setVariable("token", token);
+                }));
     }
 
     @Given("^New voting \"([^\"]*)\"$")
     public void newVoting(String title) {
-        designer.variable("id", "citrus:randomUUID()");
-        designer.variable("title", title);
-        designer.variable("options", buildOptionsAsJsonArray("yes:no"));
-        designer.variable("closed", false);
-        designer.variable("report", false);
+        runner.variable("id", "citrus:randomUUID()");
+        runner.variable("title", title);
+        runner.variable("options", buildOptionsAsJsonArray("yes:no"));
+        runner.variable("closed", false);
+        runner.variable("report", false);
     }
 
     @Given("^voting options are \"([^\"]*)\"$")
     public void votingOptions(String options) {
-        designer.variable("options", buildOptionsAsJsonArray(options));
+        runner.variable("options", buildOptionsAsJsonArray(options));
     }
 
     @Given("^reporting is enabled$")
     public void reportingIsEnabled() {
-        designer.variable("report", true);
+        runner.variable("report", true);
     }
 
     @When("^(?:I|client) creates? the voting$")
     public void createVoting() {
-        designer.http()
+        runner.http(action -> action
             .client(votingClient)
             .send()
             .post("/voting")
             .header("X-Auth-Token", "${token}")
             .contentType("application/json")
-            .payload("{ \"id\": \"${id}\", \"title\": \"${title}\", \"options\": ${options}, \"report\": ${report} }");
+            .payload("{ \"id\": \"${id}\", \"title\": \"${title}\", \"options\": ${options}, \"report\": ${report} }"));
 
-        designer.http().client(votingClient)
+        runner.http(action -> action.client(votingClient)
             .receive()
             .response(HttpStatus.OK)
-            .messageType(MessageType.JSON);
+            .messageType(MessageType.JSON));
     }
 
     @When("^(?:I|client) votes? for \"([^\"]*)\"$")
     public void voteFor(String option) {
-        designer.http().client(votingClient)
+        runner.http(action -> action.client(votingClient)
                 .send()
                 .put("voting/${id}/" + option)
-                .header("X-Auth-Token", "${token}");
+                .header("X-Auth-Token", "${token}"));
 
-        designer.http().client(votingClient)
+        runner.http(action -> action.client(votingClient)
                 .receive()
-                .response(HttpStatus.OK);
+                .response(HttpStatus.OK));
     }
 
     @When("^(?:I|client) votes? for \"([^\"]*)\" (\\d+) times$")
@@ -127,102 +131,102 @@ public class VotingIntegrationSteps {
 
     @When("^(?:I|client) closes? the voting$")
     public void closeVoting() {
-        designer.createVariable("closed", "true");
+        runner.createVariable("closed", "true");
 
-        designer.http()
+        runner.http(action -> action
             .client(votingClient)
             .send()
             .put("/voting/${id}/close")
-            .header("X-Auth-Token", "${token}");
+            .header("X-Auth-Token", "${token}"));
 
-        designer.http()
+        runner.http(action -> action
             .client(votingClient)
             .receive()
-            .response(HttpStatus.OK);
+            .response(HttpStatus.OK));
 
     }
 
     @Then("^(?:I|client) should be able to get the voting \"([^\"]*)\"$")
     public void shouldGetById(String title) {
-        designer.createVariable("title", title);
+        runner.createVariable("title", title);
         shouldGetVoting();
     }
 
     @Then("^(?:I|client) should be able to get the voting$")
     public void shouldGetVoting() {
-        designer.http()
+        runner.http(action -> action
                 .client(votingClient)
                 .send()
                 .get("/voting/${id}")
                 .header("X-Auth-Token", "${token}")
-                .accept("application/json");
+                .accept("application/json"));
 
-        designer.http()
+        runner.http(action -> action
                 .client(votingClient)
                 .receive()
                 .response(HttpStatus.OK)
                 .messageType(MessageType.JSON)
-                .payload("{ \"id\": \"${id}\", \"title\": \"${title}\", \"options\": ${options}, \"closed\": ${closed}, \"report\": ${report} }");
+                .payload("{ \"id\": \"${id}\", \"title\": \"${title}\", \"options\": ${options}, \"closed\": ${closed}, \"report\": ${report} }"));
     }
 
     @Then("^reporting should receive vote results$")
     public void shouldReceiveReport(DataTable dataTable) {
-        designer.createVariable("results", buildOptionsAsJsonArray(dataTable));
+        runner.createVariable("results", buildOptionsAsJsonArray(dataTable));
 
-        designer.receive(reportingEndpoint)
+        runner.receive(action -> action.endpoint(reportingEndpoint)
                 .messageType(MessageType.JSON)
-                .payload("{ \"id\": \"${id}\", \"title\": \"${title}\", \"options\": ${results}, \"closed\": ${closed}, \"report\": ${report} }");
+                .payload("{ \"id\": \"${id}\", \"title\": \"${title}\", \"options\": ${results}, \"closed\": ${closed}, \"report\": ${report} }"));
     }
 
     @Then("^participants should receive reporting mail$")
     public void shouldReceiveReportingMail(String text) {
-        designer.createVariable("mailBody", text);
+        runner.createVariable("mailBody", text);
 
-        designer.receive(mailServer)
+        runner.receive(action -> action.endpoint(mailServer)
                 .payload(new ClassPathResource("templates/mail.xml"))
                 .header(CitrusMailMessageHeaders.MAIL_SUBJECT, "Voting results")
                 .header(CitrusMailMessageHeaders.MAIL_FROM, "voting@example.org")
-                .header(CitrusMailMessageHeaders.MAIL_TO, "participants@example.org");
+                .header(CitrusMailMessageHeaders.MAIL_TO, "participants@example.org"));
     }
 
     @Then("^the list of votings should contain \"([^\"]*)\"$")
     public void listOfVotingsShouldContain(String title) {
-        designer.http()
+        runner.http(action -> action
             .client(votingClient)
             .send()
             .get("/voting")
             .header("X-Auth-Token", "${token}")
-            .accept("application/json");
+            .accept("application/json"));
 
-        designer.http()
+        runner.http(action -> action
             .client(votingClient)
             .receive()
             .response(HttpStatus.OK)
             .messageType(MessageType.JSON)
-            .validate("$..title.toString()", containsString(title));
+            .validate("$..title.toString()", containsString(title)));
     }
 
     @Then("^votes should be$")
     public void votesShouldBe(DataTable dataTable) {
-        designer.createVariable("options", buildOptionsAsJsonArray(dataTable));
+        runner.createVariable("options", buildOptionsAsJsonArray(dataTable));
         shouldGetVoting();
     }
 
     @Then("^top vote should be \"([^\"]*)\"$")
     public void topVoteShouldBe(String option) {
-        designer.http()
+        runner.http(action -> action
                 .client(votingClient)
                 .send()
                 .get("/voting/${id}/top")
                 .header("X-Auth-Token", "${token}")
-                .accept("application/json");
+                .accept("application/json"));
 
-        designer.http()
+        runner.http(action -> action
                 .client(votingClient)
                 .receive()
                 .response(HttpStatus.OK)
                 .messageType(MessageType.JSON)
-                .payload("{ \"name\": \"" + option + "\", \"votes\": \"@ignore@\" }");
+                .payload("{ \"name\": \"" + option + "\", \"votes\": \"@ignore@\" }"));
     }
 
     /**

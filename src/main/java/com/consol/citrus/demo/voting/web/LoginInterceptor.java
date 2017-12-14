@@ -4,8 +4,6 @@ import com.consol.citrus.demo.voting.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.EnvironmentAware;
-import org.springframework.core.env.Environment;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
@@ -18,15 +16,13 @@ import java.util.Arrays;
 /**
  * @author Christoph Deppisch
  */
-public class LoginInterceptor extends HandlerInterceptorAdapter implements EnvironmentAware {
+public class LoginInterceptor extends HandlerInterceptorAdapter {
 
     /** Logger */
     private static Logger log = LoggerFactory.getLogger(LoginInterceptor.class);
 
     @Autowired
     private UserService userService;
-
-    private Environment environment;
 
     /** Location to redirect to in case project configuration is not set */
     private String redirect;
@@ -86,11 +82,6 @@ public class LoginInterceptor extends HandlerInterceptorAdapter implements Envir
         }
 
         return "";
-    }
-
-    @Override
-    public void setEnvironment(Environment environment) {
-        this.environment = environment;
     }
 
     /**

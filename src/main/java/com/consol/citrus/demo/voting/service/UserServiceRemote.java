@@ -36,7 +36,7 @@ public class UserServiceRemote extends UserServiceLocal {
     /** Logger */
     private static Logger log = LoggerFactory.getLogger(UserServiceRemote.class);
 
-    @Value("${user.service.base.url:http://localhost:8081/services/rest/v1}")
+    @Value("${user.service.base.url:http://localhost:8088/services/rest/v1}")
     private String baseUrl;
 
     /** User service client */
