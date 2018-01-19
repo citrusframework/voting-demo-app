@@ -16,6 +16,7 @@
 
 package com.consol.citrus.demo.voting.service;
 
+import com.consol.citrus.demo.voting.dao.VotingListDao;
 import com.consol.citrus.demo.voting.model.VoteOption;
 import com.consol.citrus.demo.voting.model.Voting;
 import org.slf4j.Logger;
@@ -34,27 +35,31 @@ public class VotingServiceImpl implements VotingService {
     /** Logger */
     private static Logger log = LoggerFactory.getLogger(VotingServiceImpl.class);
 
-    /** In memory storage of votings */
-    private Map<String, Voting> votings = new HashMap<>();
+    private final VotingListDao votingListDao;
+
+    private final List<ReportingService> reportingServices;
 
     @Autowired
-    private List<ReportingService> reportingServices;
+    public VotingServiceImpl(VotingListDao votingListDao, List<ReportingService> reportingServices) {
+        this.votingListDao = votingListDao;
+        this.reportingServices = reportingServices;
+    }
 
     @Override
     public List<Voting> getVotings() {
-        return Arrays.asList(votings.values().toArray(new Voting[votings.size()]));
+        return votingListDao.list();
     }
 
     @Override
     public void add(Voting voting) {
-        votings.put(voting.getId(), voting);
+        votingListDao.save(voting);
     }
 
     @Override
     public void vote(String votingId, String option) {
         checkVoting(votingId);
 
-        Voting voting = votings.get(votingId);
+        Voting voting = votingListDao.findById(votingId);
         if (voting.isClosed()) {
             throw new RuntimeException("Failed to add vote - voting is closed!");
         }
@@ -69,13 +74,13 @@ public class VotingServiceImpl implements VotingService {
     @Override
     public Voting get(String votingId) {
         checkVoting(votingId);
-        return votings.get(votingId);
+        return votingListDao.findById(votingId);
     }
 
     @Override
     public void remove(String votingId) {
         checkVoting(votingId);
-        votings.remove(votingId);
+        votingListDao.delete(votingId);
     }
 
     @Override
@@ -115,7 +120,7 @@ public class VotingServiceImpl implements VotingService {
      * @throws RuntimeException
      */
     private void checkVoting(String votingId) throws RuntimeException {
-        if (!votings.containsKey(votingId)) {
+        if (!votingListDao.findId(votingId)) {
             throw new RuntimeException("No such voting for id: " + votingId);
         }
     }

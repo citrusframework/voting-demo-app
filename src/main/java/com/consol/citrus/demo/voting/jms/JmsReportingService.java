@@ -22,7 +22,7 @@ import com.consol.citrus.demo.voting.service.ReportingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Service;
 
@@ -30,7 +30,7 @@ import org.springframework.stereotype.Service;
  * @author Christoph Deppisch
  */
 @Service
-@Profile("jms")
+@Conditional(JmsEnabledCondition.class)
 public class JmsReportingService implements ReportingService {
 
     /** Logger */

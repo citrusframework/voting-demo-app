@@ -16,6 +16,7 @@
 
 package com.consol.citrus.demo.voting.unit;
 
+import com.consol.citrus.demo.voting.dao.InMemoryVotingListDao;
 import com.consol.citrus.demo.voting.model.VoteOption;
 import com.consol.citrus.demo.voting.model.Voting;
 import com.consol.citrus.demo.voting.service.VotingService;
@@ -31,7 +32,7 @@ import java.util.*;
  */
 public class VotingSteps {
 
-    private VotingService votingService = new VotingServiceImpl();
+    private VotingService votingService = new VotingServiceImpl(new InMemoryVotingListDao(), Collections.emptyList());
     private UUID votingId;
 
     private Stack<Exception> exceptions = new Stack<>();

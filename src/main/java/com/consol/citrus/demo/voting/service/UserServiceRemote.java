@@ -20,17 +20,18 @@ import com.consol.citrus.demo.voting.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Profile;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Christoph Deppisch
  */
 @Service
-@Profile("remote-user-auth")
+@ConditionalOnProperty(prefix = "voting.authentication", value = "type", havingValue = "remote")
 public class UserServiceRemote extends UserServiceLocal {
 
     /** Logger */

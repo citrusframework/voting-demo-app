@@ -34,7 +34,7 @@ import javax.jms.ConnectionFactory;
  */
 @Configuration
 @EnableJms
-@Profile("jms")
+@Conditional(JmsEnabledCondition.class)
 public class JmsApplicationConfig {
 
     private String brokerUrl = "tcp://localhost:61616";

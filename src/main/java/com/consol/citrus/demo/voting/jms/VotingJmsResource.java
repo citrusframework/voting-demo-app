@@ -19,7 +19,7 @@ package com.consol.citrus.demo.voting.jms;
 import com.consol.citrus.demo.voting.model.Voting;
 import com.consol.citrus.demo.voting.service.VotingService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
@@ -28,7 +28,7 @@ import org.springframework.stereotype.Component;
  * @author Christoph Deppisch
  */
 @Component
-@Profile("jms")
+@Conditional(JmsEnabledCondition.class)
 public class VotingJmsResource {
 
     @Autowired

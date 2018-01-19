@@ -19,7 +19,7 @@ package com.consol.citrus.demo.voting.service;
 import com.consol.citrus.demo.voting.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Profile;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -31,7 +31,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author Christoph Deppisch
  */
 @Service
-@Profile("!remote-user-auth")
+@ConditionalOnProperty(prefix = "voting.authentication", value = "type", havingValue = "local", matchIfMissing = true)
 public class UserServiceLocal implements UserService {
 
     private static final long EVICT_EXPIRED_INTERVAL = 1000 * 60;
