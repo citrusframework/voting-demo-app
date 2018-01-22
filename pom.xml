@@ -22,6 +22,11 @@
     <openshift.namespace>citrus</openshift.namespace>
     <openshift.user>1000080000</openshift.user>
     <application.name>voting-demo-app</application.name>
+
+    <voting.persistence.type>in_memory</voting.persistence.type>
+    <voting.jms.enabled>false</voting.jms.enabled>
+    <voting.authentication.type>local</voting.authentication.type>
+    
     <skip.gpg>false</skip.gpg>
   </properties>
 
@@ -83,7 +88,7 @@
           <version>${spring.boot.version}</version>
           <configuration>
             <fork>true</fork>
-            <jvmArguments>-Dvoting.persistence.type=in_memory -Dvoting.jms.enabled=true</jvmArguments>
+            <jvmArguments>-Dvoting.persistence.type=${voting.persistence.type} -Dvoting.jms.enabled=${voting.jms.enabled} -Dvoting.authentication.type=${voting.authentication.type}</jvmArguments>
           </configuration>
         </plugin>
       </plugins>
