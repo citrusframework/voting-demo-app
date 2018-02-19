@@ -11,9 +11,9 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <spring.version>4.3.11.RELEASE</spring.version>
-    <spring.boot.version>1.5.7.RELEASE</spring.boot.version>
-    <activemq.version>5.15.1</activemq.version>
+    <spring.version>4.3.14.RELEASE</spring.version>
+    <spring.boot.version>1.5.10.RELEASE</spring.boot.version>
+    <activemq.version>5.15.2</activemq.version>
     <slf4j.version>1.7.25</slf4j.version>
     <junit.version>4.12</junit.version>
     <cucumber.version>1.2.5</cucumber.version>
@@ -24,7 +24,7 @@
     <application.name>voting-demo-app</application.name>
 
     <voting.persistence.type>in_memory</voting.persistence.type>
-    <voting.jms.enabled>false</voting.jms.enabled>
+    <voting.jms.enabled>true</voting.jms.enabled>
     <voting.authentication.type>local</voting.authentication.type>
     
     <skip.gpg>false</skip.gpg>
