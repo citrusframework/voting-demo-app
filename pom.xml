@@ -16,8 +16,8 @@
     <activemq.version>5.15.2</activemq.version>
     <slf4j.version>1.7.25</slf4j.version>
     <junit.version>4.12</junit.version>
-    <cucumber.version>1.2.5</cucumber.version>
-    <citrus.version>2.7.3</citrus.version>
+    <cucumber.version>2.3.1</cucumber.version>
+    <citrus.version>2.7.4-SNAPSHOT</citrus.version>
     <openshift.domain>paasint.consol.de</openshift.domain>
     <openshift.namespace>citrus</openshift.namespace>
     <openshift.user>1000080000</openshift.user>
@@ -429,19 +429,19 @@
 
     <!-- Cucumber -->
     <dependency>
-      <groupId>info.cukes</groupId>
+      <groupId>io.cucumber</groupId>
       <artifactId>cucumber-core</artifactId>
       <version>${cucumber.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>info.cukes</groupId>
+      <groupId>io.cucumber</groupId>
       <artifactId>cucumber-junit</artifactId>
       <version>${cucumber.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>info.cukes</groupId>
+      <groupId>io.cucumber</groupId>
       <artifactId>cucumber-spring</artifactId>
       <version>${cucumber.version}</version>
       <scope>test</scope>

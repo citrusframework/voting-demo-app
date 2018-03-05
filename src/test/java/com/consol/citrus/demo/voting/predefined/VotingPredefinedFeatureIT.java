@@ -25,6 +25,7 @@ import org.junit.runner.RunWith;
  */
 @RunWith(Cucumber.class)
 @CucumberOptions(
+        strict = true,
         glue = { "com.consol.citrus.cucumber.step.runner.http" },
         plugin = { "com.consol.citrus.cucumber.CitrusReporter" } )
 public class VotingPredefinedFeatureIT {

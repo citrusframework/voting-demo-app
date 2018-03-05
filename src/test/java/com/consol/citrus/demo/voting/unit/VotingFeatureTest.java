@@ -16,6 +16,7 @@
 
 package com.consol.citrus.demo.voting.unit;
 
+import cucumber.api.CucumberOptions;
 import cucumber.api.junit.Cucumber;
 import org.junit.runner.RunWith;
 
@@ -23,6 +24,8 @@ import org.junit.runner.RunWith;
  * @author Christoph Deppisch
  */
 @RunWith(Cucumber.class)
+@CucumberOptions (
+    strict = true
+)
 public class VotingFeatureTest {
-
 }
